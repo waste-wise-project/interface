@@ -15,6 +15,7 @@ const WasteClassificationForm = () => {
   const [location, setLocation] = useState(null);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [mounted, setMounted] = useState(false);
+  const [imageUrl, setImageUrl] = useState('');
 
   // 图片拖拽处理
   const onDrop = React.useCallback((acceptedFiles) => {
@@ -67,10 +68,10 @@ const WasteClassificationForm = () => {
         <div className="text-center">
           <div className="text-6xl mb-4">🗑️</div>
           <h1 className="text-2xl font-bold text-gray-900 mb-4">垃圾分类挑战</h1>
-                <p className="text-gray-600 mb-8">连接钱包开始您的环保分类挑战</p>
-                <div className="flex justify-center">
-                     {mounted && <ConnectButton />}        
-                 </div>
+          <p className="text-gray-600 mb-8">连接钱包开始您的环保分类挑战</p>
+          <div className="flex justify-center">
+            {mounted && <ConnectButton />}        
+          </div>
         </div>
       </div>
     );
@@ -80,7 +81,7 @@ const WasteClassificationForm = () => {
   const wasteTypes = [
     {
       id: 'recyclable',
-      name: '可回收垃圾',
+      name: '可回收',
       description: '废纸、塑料、玻璃、金属等',
       examples: ['纸箱', '塑料瓶', '玻璃瓶', '易拉罐'],
       icon: '♻️',
@@ -89,7 +90,7 @@ const WasteClassificationForm = () => {
     },
     {
       id: 'hazardous',
-      name: '有害垃圾',
+      name: '有害',
       description: '废电池、废灯管、废药品等',
       examples: ['电池', '灯泡', '过期药品', '油漆桶'],
       icon: '☢️',
@@ -98,7 +99,7 @@ const WasteClassificationForm = () => {
     },
     {
       id: 'wet',
-      name: '湿垃圾/厨余垃圾',
+      name: '湿垃圾',
       description: '易腐垃圾，食材废料等',
       examples: ['果皮', '菜叶', '剩菜剩饭', '蛋壳'],
       icon: '🥬',
@@ -107,7 +108,7 @@ const WasteClassificationForm = () => {
     },
     {
       id: 'dry',
-      name: '干垃圾/其他垃圾',
+      name: '干垃圾',
       description: '除上述三类之外的垃圾',
       examples: ['烟蒂', '陶瓷', '尿不湿', '猫砂'],
       icon: '🗑️',
@@ -116,51 +117,209 @@ const WasteClassificationForm = () => {
     }
   ];
 
-  const handleSubmit = () => {
-    if (!selectedImage || !selectedType || isSubmitting) {
+  // AI识别函数
+  const analyzeWithAI = async (imageUrlInput, userSelectedType) => {
+    try {
+      console.log('发送AI请求:', {
+        url: 'http://localhost:4111/api/agents/wasteClassifier/generate',
+        method: 'POST',
+        body: {
+          messages: [{
+            role: 'user',
+            content: `分析图片：${imageUrlInput}，我认为是${wasteTypes.find(t => t.id === userSelectedType)?.name || userSelectedType}`
+          }]
+        }
+      });
+
+      const response = await fetch('http://localhost:4111/api/agents/wasteClassifier/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: [{
+            role: 'user',
+            content: `分析图片：${imageUrlInput}，我认为是${wasteTypes.find(t => t.id === userSelectedType)?.name || userSelectedType}`
+          }]
+        })
+      });
+
+      console.log('AI响应状态:', response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('AI服务响应错误:', errorText);
+        throw new Error(`AI服务请求失败: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('AI响应数据:', data);
+      return data;
+    } catch (error) {
+      console.error('AI分析错误:', error);
+      throw error;
+    }
+  };
+
+  const handleSubmit = async () => {
+    if ((!selectedImage && !imageUrl) || !selectedType || isSubmitting) {
       return;
     }
 
     setIsSubmitting(true);
     setResult(null);
 
-    // 准备提交的表单数据
-    const formData = {
-      image: selectedImage,
-      wasteType: selectedType,
-      location: location,
-      timestamp: currentTime.toISOString(),
-      // 格式化的提交数据
-      submissionData: {
-        fileName: selectedImage.name,
-        fileSize: selectedImage.size,
-        selectedCategory: wasteTypes.find(t => t.id === selectedType)?.name,
-        country: location?.country,
-        region: location?.region,
-        city: location?.city,
-        ipAddress: location?.ip,
-        submittedAt: currentTime.toLocaleString('zh-CN')
-      }
-    };
-
-    console.log('提交的表单数据:', formData);
-
-    // 模拟AI识别
-    setTimeout(() => {
-      const isCorrect = Math.random() > 0.3;
-      const confidence = 0.7 + Math.random() * 0.3;
+    try {
+      let finalImageUrl = imageUrl;
       
-      const mockResult = {
+      // 如果没有输入URL但有上传的图片，这里可以实现图片上传到云存储的逻辑
+      if (!finalImageUrl && selectedImage) {
+        // 这里应该将图片上传到云存储服务并获取URL
+        // 暂时使用一个示例URL
+        finalImageUrl = 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=500';
+      }
+
+      if (!finalImageUrl) {
+        throw new Error('请提供图片URL或上传图片');
+      }
+
+      // 调用AI分析
+      const aiResponse = await analyzeWithAI(finalImageUrl, selectedType);
+      
+      // 解析真实的AI响应数据
+      const aiText = aiResponse.text || '';
+      const usage = aiResponse.usage || {};
+      
+      // 从AI响应中提取关键信息
+      const aiDetectedCategory = extractDetectedCategory(aiText);
+      const confidence = extractConfidence(aiText);
+      const isCorrect = checkIfCorrect(aiText);
+      
+      // 构建结果对象，使用真实AI数据
+      const result = {
         isCorrect,
-        aiPrediction: wasteTypes[Math.floor(Math.random() * wasteTypes.length)].id,
-        confidence,
-        reasoning: isCorrect ? '分类正确！' : '分类有误，请重新尝试',
-        submissionData: formData.submissionData
+        aiPrediction: aiDetectedCategory,
+        confidence: confidence / 100,
+        reasoning: isCorrect ? 'AI认为分类正确！' : 'AI认为分类错误',
+        aiAnalysis: aiText,
+        rawAiResponse: aiResponse, // 保存完整的AI响应
+        usage: {
+          promptTokens: usage.promptTokens || 0,
+          completionTokens: usage.completionTokens || 0,
+          totalTokens: usage.totalTokens || 0
+        },
+        submissionData: {
+          fileName: selectedImage?.name || 'URL图片',
+          fileSize: selectedImage?.size || 0,
+          selectedCategory: wasteTypes.find(t => t.id === selectedType)?.name,
+          country: location?.country,
+          region: location?.region,
+          city: location?.city,
+          ipAddress: location?.ip,
+          submittedAt: currentTime.toLocaleString('zh-CN'),
+          imageUrl: finalImageUrl,
+          aiModelUsed: aiResponse.response?.modelId || 'gpt-4o',
+          requestId: aiResponse.response?.id || 'unknown'
+        }
       };
       
-      setResult(mockResult);
+      setResult(result);
+    } catch (error) {
+      console.error('提交错误:', error);
+      // 显示错误信息给用户
+      const errorResult = {
+        isCorrect: false,
+        aiPrediction: 'error',
+        confidence: 0,
+        reasoning: `分析失败: ${error.message}`,
+        aiAnalysis: '无法连接到AI服务，请检查网络连接或稍后重试。',
+        submissionData: {
+          fileName: selectedImage?.name || 'URL图片',
+          selectedCategory: wasteTypes.find(t => t.id === selectedType)?.name,
+          submittedAt: currentTime.toLocaleString('zh-CN'),
+          error: error.message
+        }
+      };
+      setResult(errorResult);
+    } finally {
       setIsSubmitting(false);
-    }, 2000);
+    }
+  };
+
+  // 辅助函数：从AI响应中提取检测到的类别
+  const extractDetectedCategory = (text) => {
+    // 优先查找AI识别结果部分
+    if (text.includes('AI识别结果：')) {
+      const match = text.match(/AI识别结果：([^，\n]+)/);
+      if (match) return match[1].trim();
+    }
+    
+    // 查找具体的垃圾类型
+    if (text.includes('垃圾桶')) return '垃圾桶';
+    if (text.includes('可回收垃圾')) return '可回收垃圾';
+    if (text.includes('有害垃圾')) return '有害垃圾';
+    if (text.includes('湿垃圾') || text.includes('厨余垃圾')) return '湿垃圾/厨余垃圾';
+    if (text.includes('干垃圾') || text.includes('其他垃圾')) return '干垃圾/其他垃圾';
+    
+    // 从分析报告中提取
+    const categoryMatch = text.match(/(?:识别|检测|分类)(?:为|结果|是)[:：]?\s*([^，。\n]+)/);
+    if (categoryMatch) return categoryMatch[1].trim();
+    
+    return '未识别';
+  };
+
+  // 辅助函数：从AI响应中提取置信度
+  const extractConfidence = (text) => {
+    // 查找各种置信度格式
+    const patterns = [
+      /置信度[:：]\s*(\d+(?:\.\d+)?)%/,
+      /AI置信度[:：]\s*(\d+(?:\.\d+)?)%/,
+      /(\d+(?:\.\d+)?)%/g
+    ];
+    
+    for (const pattern of patterns) {
+      const match = text.match(pattern);
+      if (match) {
+        const confidence = parseFloat(match[1]);
+        if (confidence >= 0 && confidence <= 100) {
+          return confidence;
+        }
+      }
+    }
+    
+    return 85; // 默认置信度
+  };
+
+  // 辅助函数：检查分类是否正确
+  const checkIfCorrect = (text) => {
+    // 明确的正确指示
+    if (text.includes('分类正确') || text.includes('✅') || text.includes('🎉')) {
+      return true;
+    }
+    
+    // 明确的错误指示
+    if (text.includes('分类错误') || text.includes('分类有误') || text.includes('❌')) {
+      return false;
+    }
+    
+    // 检查匹配状态
+    if (text.includes('"match":false') || text.includes('"match": false')) {
+      return false;
+    }
+    
+    if (text.includes('"match":true') || text.includes('"match": true')) {
+      return true;
+    }
+    
+    // 分析得分（假设低于50分为错误）
+    const scoreMatch = text.match(/(?:得分|分数|score)[:：]\s*(\d+)/i);
+    if (scoreMatch) {
+      const score = parseInt(scoreMatch[1]);
+      return score >= 50;
+    }
+    
+    // 默认返回false（更保守的选择）
+    return false;
   };
 
   const resetForm = () => {
@@ -168,6 +327,7 @@ const WasteClassificationForm = () => {
     setSelectedType('');
     setResult(null);
     setPreview(null);
+    setImageUrl('');
   };
 
   return (
@@ -219,6 +379,20 @@ const WasteClassificationForm = () => {
               📷 上传垃圾图片
             </h2>
             
+            {/* 图片URL输入 */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                或输入图片URL：
+              </label>
+              <input
+                type="url"
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+                placeholder="https://example.com/image.jpg"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              />
+            </div>
+            
             <div
               {...getRootProps()}
               className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-300 ${
@@ -244,6 +418,16 @@ const WasteClassificationForm = () => {
                       {Math.round((selectedImage?.size || 0) / 1024)}KB
                     </p>
                   </div>
+                </div>
+              ) : imageUrl ? (
+                <div className="space-y-4">
+                  <img 
+                    src={imageUrl} 
+                    alt="URL图片" 
+                    className="max-w-full max-h-64 mx-auto rounded-lg shadow-md"
+                    onError={() => console.log('图片加载失败')}
+                  />
+                  <p className="text-sm font-medium text-gray-700">URL图片</p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -337,7 +521,7 @@ const WasteClassificationForm = () => {
             <div
               onClick={handleSubmit}
               className={`mt-6 w-full py-4 px-6 rounded-xl text-center font-semibold transition-all duration-300 cursor-pointer ${
-                !selectedImage || !selectedType || isSubmitting
+                (!selectedImage && !imageUrl) || !selectedType || isSubmitting
                   ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
                   : 'bg-gradient-to-r from-green-500 to-blue-500 text-white hover:from-green-600 hover:to-blue-600 transform hover:scale-105 shadow-lg'
               }`}
@@ -348,7 +532,7 @@ const WasteClassificationForm = () => {
                   <span>AI识别中...</span>
                 </div>
               ) : (
-                '🚀 开始识别'
+                '🚀 开始AI识别'
               )}
             </div>
           </div>
@@ -358,7 +542,7 @@ const WasteClassificationForm = () => {
         {result && (
           <div className="mt-8 bg-white rounded-2xl shadow-sm p-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-              🎯 识别结果
+              🎯 AI识别结果
             </h2>
             
             <div className={`p-6 rounded-xl ${
@@ -372,7 +556,7 @@ const WasteClassificationForm = () => {
                     {result.isCorrect ? '🎉' : '❌'}
                   </span>
                   <span className="text-xl font-bold">
-                    {result.isCorrect ? '分类正确！' : '分类错误'}
+                    {result.isCorrect ? 'AI认为分类正确！' : 'AI认为分类错误'}
                   </span>
                 </div>
                 <span className={`text-sm px-3 py-1 rounded-full ${
@@ -384,16 +568,39 @@ const WasteClassificationForm = () => {
                 </span>
               </div>
               
-              <div className="text-sm text-gray-700">
-                <p className="mb-2">
+              <div className="text-sm text-gray-700 space-y-2">
+                <p>
                   <span className="font-medium">你的选择:</span> {wasteTypes.find(t => t.id === selectedType)?.name}
                 </p>
-                <p className="mb-2">
-                  <span className="font-medium">AI预测:</span> {wasteTypes.find(t => t.id === result.aiPrediction)?.name}
+                <p>
+                  <span className="font-medium">AI识别:</span> {result.aiPrediction}
                 </p>
-                <p className="mb-2">
+                <p>
                   <span className="font-medium">结果:</span> {result.reasoning}
                 </p>
+                
+                {/* AI详细分析 */}
+                {result.aiAnalysis && (
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <h4 className="font-medium mb-2">AI详细分析:</h4>
+                    <div className="bg-gray-50 p-3 rounded-lg text-xs leading-relaxed max-h-60 overflow-y-auto">
+                      <div className="whitespace-pre-wrap">{result.aiAnalysis}</div>
+                    </div>
+                  </div>
+                )}
+
+                {/* AI使用统计 */}
+                {result.usage && (
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <h4 className="font-medium mb-2">AI使用统计:</h4>
+                    <div className="grid grid-cols-3 gap-2 text-xs">
+                      <p><span className="font-medium">输入Token:</span> {result.usage.promptTokens}</p>
+                      <p><span className="font-medium">输出Token:</span> {result.usage.completionTokens}</p>
+                      <p><span className="font-medium">总Token:</span> {result.usage.totalTokens}</p>
+                    </div>
+                  </div>
+                )}
+                
                 {result.submissionData && (
                   <div className="mt-4 pt-4 border-t border-gray-200">
                     <p className="font-medium mb-2">提交信息:</p>
@@ -402,6 +609,15 @@ const WasteClassificationForm = () => {
                       <p><span className="font-medium">时间:</span> {result.submissionData.submittedAt}</p>
                       <p><span className="font-medium">文件:</span> {result.submissionData.fileName}</p>
                       <p><span className="font-medium">IP:</span> {result.submissionData.ipAddress}</p>
+                      <p><span className="font-medium">AI模型:</span> {result.submissionData.aiModelUsed}</p>
+                      <p><span className="font-medium">请求ID:</span> {result.submissionData.requestId}</p>
+                      {result.submissionData.imageUrl && (
+                        <p className="col-span-2"><span className="font-medium">图片URL:</span> 
+                          <a href={result.submissionData.imageUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 ml-1 break-all">
+                            {result.submissionData.imageUrl}
+                          </a>
+                        </p>
+                      )}
                     </div>
                   </div>
                 )}
