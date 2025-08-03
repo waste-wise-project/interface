@@ -10,11 +10,28 @@ export default function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navigation = [
-    { name: '首页', href: '/', current: pathname === '/' },
-    { name: '垃圾分类', href: '/classification', current: pathname === '/classification' },
-    { name: '我的收藏', href: '/collection', current: pathname === '/collection' },
-    { name: '排行榜', href: '/leaderboard', current: pathname === '/leaderboard' },
-  ];
+		{ name: '首页', href: '/', current: pathname === '/' },
+		{
+			name: '垃圾分类',
+			href: '/classification',
+			current: pathname === '/classification',
+		},
+		{
+			name: '我的收藏',
+			href: '/collection',
+			current: pathname === '/collection',
+		},
+		{
+			name: '排行榜',
+			href: '/leaderboard',
+			current: pathname === '/leaderboard',
+		},
+		{
+			name: '新增NFT',
+			href: '/mintNFT',
+			current: pathname === '/minNFT',
+		},
+	];
 
   return (
     <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
