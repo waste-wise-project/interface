@@ -2,8 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
+import { useAccount } from 'wagmi';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 
 const WasteClassificationForm = () => {
+  const { isConnected } = useAccount();
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedType, setSelectedType] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -11,6 +14,67 @@ const WasteClassificationForm = () => {
   const [preview, setPreview] = useState(null);
   const [location, setLocation] = useState(null);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [mounted, setMounted] = useState(false);
+
+  // 图片拖拽处理
+  const onDrop = React.useCallback((acceptedFiles) => {
+    const file = acceptedFiles[0];
+    if (file) {
+      setSelectedImage(file);
+      
+      // 创建预览
+      const reader = new FileReader();
+      reader.onload = () => setPreview(reader.result);
+      reader.readAsDataURL(file);
+    }
+  }, []);
+
+  // 获取位置信息和更新时间
+  useEffect(() => {
+    setMounted(true);
+    
+    // 模拟获取IP位置信息
+    setLocation({
+      country: '中国',
+      region: '广东省',
+      city: '深圳市',
+      ip: '192.168.1.100'
+    });
+    
+    // 每秒更新时间
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    
+    return () => clearInterval(timer);
+  }, []);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      'image/jpeg': ['.jpg', '.jpeg'],
+      'image/png': ['.png'],
+      'image/webp': ['.webp']
+    },
+    maxSize: 5 * 1024 * 1024,
+    multiple: false
+  });
+
+  // 如果钱包未连接，显示连接提示
+  if (!isConnected) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-6xl mb-4">🗑️</div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">垃圾分类挑战</h1>
+                <p className="text-gray-600 mb-8">连接钱包开始您的环保分类挑战</p>
+                <div className="flex justify-center">
+                     {mounted && <ConnectButton />}        
+                 </div>
+        </div>
+      </div>
+    );
+  }
 
   // 垃圾分类类型
   const wasteTypes = [
@@ -51,48 +115,6 @@ const WasteClassificationForm = () => {
       hoverColor: 'hover:bg-gray-50'
     }
   ];
-
-  // 图片拖拽处理
-  const onDrop = React.useCallback((acceptedFiles) => {
-    const file = acceptedFiles[0];
-    if (file) {
-      setSelectedImage(file);
-      
-      // 创建预览
-      const reader = new FileReader();
-      reader.onload = () => setPreview(reader.result);
-      reader.readAsDataURL(file);
-    }
-  }, []);
-
-  // 获取位置信息和更新时间
-  useEffect(() => {
-    // 模拟获取IP位置信息
-    setLocation({
-      country: '中国',
-      region: '广东省',
-      city: '深圳市',
-      ip: '192.168.1.100'
-    });
-    
-    // 每秒更新时间
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-    
-    return () => clearInterval(timer);
-  }, []);
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: {
-      'image/jpeg': ['.jpg', '.jpeg'],
-      'image/png': ['.png'],
-      'image/webp': ['.webp']
-    },
-    maxSize: 5 * 1024 * 1024,
-    multiple: false
-  });
 
   const handleSubmit = () => {
     if (!selectedImage || !selectedType || isSubmitting) {
@@ -260,16 +282,20 @@ const WasteClassificationForm = () => {
                 <h3 className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
                   🕐 当前时间
                 </h3>
-                <p className="text-sm text-gray-600">
-                  {currentTime.toLocaleString('zh-CN', {
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit'
-                  })}
-                </p>
+                {mounted ? (
+                  <p className="text-sm text-gray-600">
+                    {currentTime.toLocaleString('zh-CN', {
+                      year: 'numeric',
+                      month: '2-digit',
+                      day: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      second: '2-digit'
+                    })}
+                  </p>
+                ) : (
+                  <p className="text-sm text-gray-500">正在加载时间...</p>
+                )}
               </div>
             </div>
           </div>

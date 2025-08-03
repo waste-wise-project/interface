@@ -16,8 +16,10 @@ export default function CollectionPage() {
         <div className="text-center">
           <div className="text-6xl mb-4">🏆</div>
           <h1 className="text-2xl font-bold text-gray-900 mb-4">我的NFT收藏</h1>
-          <p className="text-gray-600 mb-8">连接钱包查看你的环保NFT收藏</p>
-          <ConnectButton />
+                <p className="text-gray-600 mb-8">连接钱包查看你的环保NFT收藏</p>
+                <div className="flex justify-center">
+                    <ConnectButton />
+                </div>
         </div>
       </div>
     );
