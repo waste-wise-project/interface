@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, use } from 'react';
 import {
 	useAccount,
 	useWriteContract,
 	useWaitForTransactionReceipt,
 	useReadContract,
+	useReadContracts,
 } from 'wagmi';
 import { isAddress } from 'viem';
 import { CONTRACT_ADDRESS, WASTE_WISE_ABI } from '@/contract';
@@ -74,6 +75,10 @@ export function useWasteWiseContract(): WasteWiseContractReturn {
 		messageType: 'info',
 	});
 
+	// 内部状态用于存储查询结果
+	const [userTokenIds, setUserTokenIds] = useState<bigint[]>([]);
+	const [targetAddress, setTargetAddress] = useState<string>('');
+
 	// 读取合约数据
 	const { data: contractOwner, refetch: refetchOwner } = useReadContract({
 		address: CONTRACT_ADDRESS,
@@ -85,6 +90,59 @@ export function useWasteWiseContract(): WasteWiseContractReturn {
 		address: CONTRACT_ADDRESS,
 		abi: WASTE_WISE_ABI,
 		functionName: 'getTotalSupply',
+	});
+
+	// 获取用户NFT token IDs
+	const { data: userNFTIds, refetch: refetchUserNFTs } = useReadContract({
+		address: CONTRACT_ADDRESS,
+		abi: WASTE_WISE_ABI,
+		functionName: 'getUserNFTs',
+		args: targetAddress ? [targetAddress as `0x${string}`] : undefined,
+		query: {
+			enabled: !!targetAddress && isAddress(targetAddress),
+		},
+	});
+
+	// 获取用户余额
+	const { data: userBalance, refetch: refetchBalance } = useReadContract({
+		address: CONTRACT_ADDRESS,
+		abi: WASTE_WISE_ABI,
+		functionName: 'balanceOf',
+		args: targetAddress ? [targetAddress as `0x${string}`] : undefined,
+		query: {
+			enabled: !!targetAddress && isAddress(targetAddress),
+		},
+	});
+
+	// 批量获取NFT详细信息
+	const nftContracts = userTokenIds
+		.map((tokenId) => [
+			{
+				address: CONTRACT_ADDRESS,
+				abi: WASTE_WISE_ABI,
+				functionName: 'ownerOf',
+				args: [tokenId],
+			},
+			{
+				address: CONTRACT_ADDRESS,
+				abi: WASTE_WISE_ABI,
+				functionName: 'tokenURI',
+				args: [tokenId],
+			},
+			{
+				address: CONTRACT_ADDRESS,
+				abi: WASTE_WISE_ABI,
+				functionName: 'exists',
+				args: [tokenId],
+			},
+		])
+		.flat();
+
+	const { data: nftDetails, refetch: refetchNFTDetails } = useReadContracts({
+		contracts: nftContracts,
+		query: {
+			enabled: userTokenIds.length > 0,
+		},
 	});
 
 	// 写入操作
@@ -142,21 +200,71 @@ export function useWasteWiseContract(): WasteWiseContractReturn {
 	// 获取用户NFT列表
 	const getUserNFTs = useCallback(
 		async (userAddress?: string): Promise<NFTInfo[]> => {
-			const targetAddress = userAddress || address;
-			if (!targetAddress) {
-				throw new Error('用户地址不能为空');
+			const queryAddress = userAddress || address;
+			console.log(userAddress, 'userAddress');
+			if (!queryAddress) {
+				// throw new Error('用户地址不能为空');
+				return [];
 			}
 
 			updateState({ isLoading: true, error: null });
 
 			try {
-				// 这里应该使用 useReadContract，但为了在函数中调用，我们模拟实现
-				// 实际项目中，你可能需要使用 wagmi 的 readContract 函数
+				// 设置目标地址以触发查询
+				setTargetAddress(queryAddress);
 
-				// 模拟数据 - 实际实现需要调用合约
+				// 等待一下让 React Query 更新
+				await new Promise((resolve) => setTimeout(resolve, 100));
+
+				// 手动触发重新获取
+				await refetchUserNFTs();
+
+				if (!userNFTIds || !Array.isArray(userNFTIds)) {
+					updateState({
+						isLoading: false,
+						message: '✅ 该用户暂无NFT',
+						messageType: 'success',
+					});
+					return [];
+				}
+
+				// 更新状态以获取详细信息
+				setUserTokenIds(userNFTIds as bigint[]);
+
+				// 等待详细信息查询完成
+				await refetchNFTDetails();
+
 				const nfts: NFTInfo[] = [];
 
-				updateState({ isLoading: false });
+				if (nftDetails && userNFTIds.length > 0) {
+					for (let i = 0; i < userNFTIds.length; i++) {
+						const tokenId = userNFTIds[i];
+						const baseIndex = i * 3;
+
+						const ownerResult = nftDetails[baseIndex];
+						const tokenURIResult = nftDetails[baseIndex + 1];
+						const existsResult = nftDetails[baseIndex + 2];
+
+						if (
+							ownerResult?.status === 'success' &&
+							tokenURIResult?.status === 'success' &&
+							existsResult?.status === 'success' &&
+							existsResult.result
+						) {
+							nfts.push({
+								tokenId: tokenId.toString(),
+								owner: ownerResult.result as string,
+								tokenURI: tokenURIResult.result as string,
+							});
+						}
+					}
+				}
+
+				updateState({
+					isLoading: false,
+					message: `✅ 成功获取 ${nfts.length} 个NFT`,
+					messageType: 'success',
+				});
 				return nfts;
 			} catch (error) {
 				const errorMessage =
@@ -170,7 +278,14 @@ export function useWasteWiseContract(): WasteWiseContractReturn {
 				throw error;
 			}
 		},
-		[address, updateState]
+		[
+			address,
+			updateState,
+			refetchUserNFTs,
+			refetchNFTDetails,
+			userNFTIds,
+			nftDetails,
+		]
 	);
 
 	// 获取NFT信息
@@ -179,12 +294,39 @@ export function useWasteWiseContract(): WasteWiseContractReturn {
 			updateState({ isLoading: true, error: null });
 
 			try {
-				// 实际实现需要调用合约读取方法
-				// const owner = await readContract({...});
-				// const tokenURI = await readContract({...});
+				// 创建单个NFT查询
+				const singleNFTContracts = [
+					{
+						address: CONTRACT_ADDRESS,
+						abi: WASTE_WISE_ABI,
+						functionName: 'exists',
+						args: [BigInt(tokenId)],
+					},
+					{
+						address: CONTRACT_ADDRESS,
+						abi: WASTE_WISE_ABI,
+						functionName: 'ownerOf',
+						args: [BigInt(tokenId)],
+					},
+					{
+						address: CONTRACT_ADDRESS,
+						abi: WASTE_WISE_ABI,
+						functionName: 'tokenURI',
+						args: [BigInt(tokenId)],
+					},
+				];
 
-				updateState({ isLoading: false });
-				return null; // 返回实际数据
+				// 使用 useReadContracts 但需要在组件外部，这里我们模拟等待结果
+				// 实际应用中，你可能需要创建一个单独的 hook 或使用状态管理
+
+				updateState({
+					isLoading: false,
+					message: `✅ 请使用组件内的 useReadContracts 来实现单个NFT查询`,
+					messageType: 'info',
+				});
+
+				// 这里返回 null，实际实现需要在组件层面处理
+				return null;
 			} catch (error) {
 				const errorMessage =
 					error instanceof Error ? error.message : '获取NFT信息失败';
@@ -200,15 +342,13 @@ export function useWasteWiseContract(): WasteWiseContractReturn {
 		[updateState]
 	);
 
-	// 检查NFT是否存在
+	// 检查NFT是否存在 - 需要在组件中使用 useReadContract
 	const checkNFTExists = useCallback(
 		async (tokenId: number): Promise<boolean> => {
-			try {
-				// 实际实现需要调用合约
-				return false;
-			} catch {
-				return false;
-			}
+			// 这个函数需要在组件中单独实现 useReadContract
+			// 这里返回 false 作为默认值
+			console.warn('checkNFTExists 需要在组件中使用 useReadContract 实现');
+			return false;
 		},
 		[]
 	);
@@ -216,17 +356,18 @@ export function useWasteWiseContract(): WasteWiseContractReturn {
 	// 获取用户余额
 	const getUserBalance = useCallback(
 		async (userAddress?: string): Promise<number> => {
-			const targetAddress = userAddress || address;
-			if (!targetAddress) return 0;
+			const queryAddress = userAddress || address;
+			if (!queryAddress) return 0;
 
-			try {
-				// 实际实现需要调用合约
-				return 0;
-			} catch {
-				return 0;
-			}
+			// 设置目标地址
+			setTargetAddress(queryAddress);
+
+			// 触发重新获取
+			await refetchBalance();
+
+			return userBalance ? Number(userBalance) : 0;
 		},
-		[address]
+		[address, userBalance, refetchBalance]
 	);
 
 	// 铸造NFT
@@ -246,6 +387,15 @@ export function useWasteWiseContract(): WasteWiseContractReturn {
 				updateState({
 					error: 'Token URI无效',
 					message: '❌ Token URI无效',
+					messageType: 'error',
+				});
+				return;
+			}
+
+			if (!isConnected) {
+				updateState({
+					error: '钱包未连接',
+					message: '❌ 请先连接钱包',
 					messageType: 'error',
 				});
 				return;
@@ -281,6 +431,7 @@ export function useWasteWiseContract(): WasteWiseContractReturn {
 		[
 			validateAddress,
 			validateTokenURI,
+			isConnected,
 			isOwner,
 			writeContract,
 			updateState,
@@ -295,6 +446,15 @@ export function useWasteWiseContract(): WasteWiseContractReturn {
 				updateState({
 					error: '接收者地址无效',
 					message: '❌ 接收者地址无效',
+					messageType: 'error',
+				});
+				return;
+			}
+
+			if (!isConnected) {
+				updateState({
+					error: '钱包未连接',
+					message: '❌ 请先连接钱包',
 					messageType: 'error',
 				});
 				return;
@@ -318,14 +478,23 @@ export function useWasteWiseContract(): WasteWiseContractReturn {
 				});
 			}
 		},
-		[validateAddress, writeContract, updateState, clearState]
+		[validateAddress, isConnected, writeContract, updateState, clearState]
 	);
 
 	// 刷新所有数据
 	const refetch = useCallback(() => {
 		refetchOwner();
 		refetchTotalSupply();
-	}, [refetchOwner, refetchTotalSupply]);
+		refetchUserNFTs();
+		refetchBalance();
+		refetchNFTDetails();
+	}, [
+		refetchOwner,
+		refetchTotalSupply,
+		refetchUserNFTs,
+		refetchBalance,
+		refetchNFTDetails,
+	]);
 
 	// 监听交易状态变化
 	useEffect(() => {
