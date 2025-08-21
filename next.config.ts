@@ -10,7 +10,10 @@ const nextConfig: NextConfig = {
 			'dweb.link',
 			'nftstorage.link',
 			'ipfs.infura.io',
-			// 添加其他可能用到的 IPFS 网关
+			'jfnfivcnkvsvxjwmevru.supabase.co',
+			'ivory-personal-goat-759.mypinata.cloud',
+			// 需删除
+			'cdn.example.com',
 		],
 	},
 };

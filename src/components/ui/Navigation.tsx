@@ -22,6 +22,11 @@ export default function Navigation() {
 			current: pathname === '/collection',
 		},
 		{
+			name: '我的成就',
+			href: '/achievements',
+			current: pathname === '/achievements',
+		},
+		{
 			name: '排行榜',
 			href: '/leaderboard',
 			current: pathname === '/leaderboard',

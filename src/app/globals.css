@@ -24,3 +24,316 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+@layer utilities {
+  /* 自定义动画关键帧 */
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  @keyframes glow {
+    0% {
+      box-shadow: 0 0 5px rgb(59 130 246 / 0.4), 
+                  0 0 10px rgb(59 130 246 / 0.4), 
+                  0 0 15px rgb(59 130 246 / 0.4);
+    }
+    100% {
+      box-shadow: 0 0 10px rgb(59 130 246 / 0.4), 
+                  0 0 20px rgb(59 130 246 / 0.4), 
+                  0 0 30px rgb(59 130 246 / 0.4);
+    }
+  }
+
+  @keyframes gradient-x {
+    0%, 100% {
+      background-size: 200% 200%;
+      background-position: left center;
+    }
+    50% {
+      background-size: 200% 200%;
+      background-position: right center;
+    }
+  }
+
+  @keyframes fadeIn {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideUp {
+    0% {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  /* 自定义动画类 */
+  .animate-shimmer {
+    animation: shimmer 2s linear infinite;
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite alternate;
+  }
+
+  .animate-gradient-x {
+    animation: gradient-x 3s ease infinite;
+  }
+
+  .animate-fadeIn {
+    animation: fadeIn 0.5s ease-in;
+  }
+
+  .animate-slideUp {
+    animation: slideUp 0.3s ease-out;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  .animate-bounce-slow {
+    animation: bounce 3s infinite;
+  }
+}
+
+/* 成就卡片特殊效果 - 使用 Tailwind v4 兼容的圆角 */
+@layer components {
+  .achievement-card {
+    @apply relative overflow-hidden rounded-xl bg-white shadow-lg transition-all duration-300 hover:shadow-xl;
+  }
+
+  .achievement-icon {
+    @apply relative flex items-center justify-center rounded-full bg-gradient-to-br shadow-lg;
+  }
+
+  .achievement-progress {
+    @apply relative h-3 overflow-hidden rounded-full bg-slate-200;
+  }
+
+  .achievement-progress-bar {
+    @apply h-full rounded-full bg-gradient-to-r transition-all duration-1000 ease-out;
+  }
+
+  /* 等级特定样式 */
+  .tier-bronze {
+    @apply bg-gradient-to-br from-amber-300 via-orange-400 to-amber-600;
+  }
+
+  .tier-silver {
+    @apply bg-gradient-to-br from-slate-300 via-gray-400 to-slate-500;
+  }
+
+  .tier-gold {
+    @apply bg-gradient-to-br from-yellow-300 via-amber-400 to-yellow-600;
+  }
+
+  .tier-platinum {
+    @apply bg-gradient-to-br from-slate-200 via-blue-300 to-slate-400;
+  }
+
+  .tier-diamond {
+    @apply bg-gradient-to-br from-cyan-200 via-blue-300 to-indigo-400;
+  }
+
+  /* 状态徽章样式 */
+  .status-claimed {
+    @apply bg-emerald-500 text-white;
+  }
+
+  .status-claimable {
+    @apply bg-blue-500 text-white;
+  }
+
+  .status-completed {
+    @apply bg-amber-500 text-white;
+  }
+
+  .status-progress {
+    @apply bg-slate-400 text-white;
+  }
+
+  /* 通用按钮样式 */
+  .btn-primary {
+    @apply bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300;
+  }
+
+  .btn-secondary {
+    @apply bg-white text-slate-700 px-6 py-3 rounded-xl font-semibold shadow-lg border-2 border-slate-200 hover:border-indigo-300 transition-all duration-300;
+  }
+
+  /* 统计卡片样式 */
+  .stats-card {
+    @apply bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600 rounded-xl p-6 text-white shadow-xl relative overflow-hidden;
+  }
+
+  /* 成就网格 */
+  .achievement-grid {
+    @apply grid gap-8;
+  }
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .achievement-card {
+    @apply mx-4;
+  }
+  
+  .achievement-grid {
+    @apply grid-cols-1 gap-4;
+  }
+
+  .stats-card {
+    @apply p-4;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    @apply px-4 py-2 text-sm;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .achievement-grid {
+    @apply grid-cols-2 gap-6;
+  }
+}
+
+@media (min-width: 1025px) {
+  .achievement-grid {
+    @apply grid-cols-3 gap-8;
+  }
+}
+
+/* 暗色模式支持 */
+@media (prefers-color-scheme: dark) {
+  .achievement-card {
+    @apply bg-slate-800 border-slate-700;
+  }
+
+  .achievement-card h3 {
+    @apply text-white;
+  }
+
+  .achievement-card p {
+    @apply text-slate-300;
+  }
+
+  .achievement-progress {
+    @apply bg-slate-700;
+  }
+}
+
+/* 可访问性增强 */
+@media (prefers-reduced-motion: reduce) {
+  .animate-shimmer,
+  .animate-float,
+  .animate-glow,
+  .animate-gradient-x,
+  .animate-fadeIn,
+  .animate-slideUp,
+  .animate-pulse-slow,
+  .animate-bounce-slow {
+    animation: none;
+  }
+
+  .achievement-card {
+    @apply transition-none;
+  }
+  
+  /* 禁用旋转装饰球动画 */
+  .achievement-icon div[style*="rotate"] {
+    animation: none !important;
+    transform: none !important;
+  }
+}
+
+/* 性能优化 */
+@layer utilities {
+  /* 为旋转元素启用硬件加速 */
+  .rotate-orbit {
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+  
+  /* 优化旋转动画性能 */
+  @keyframes orbit {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .animate-orbit-slow {
+    animation: orbit 4s linear infinite;
+  }
+  
+  .animate-orbit-medium {
+    animation: orbit 6s linear infinite;
+  }
+  
+  .animate-orbit-fast {
+    animation: orbit 3s linear infinite;
+  }
+}
+
+/* 装饰球样式增强 */
+@layer components {
+  .orbit-ball {
+    @apply rounded-full shadow-sm;
+    will-change: transform;
+    transform: translateZ(0);
+  }
+  
+  .orbit-ball-outer {
+    @apply w-2 h-2;
+  }
+  
+  .orbit-ball-inner {
+    @apply w-1.5 h-1.5;
+  }
+  
+  /* 状态相关的球颜色 */
+  .orbit-ball-claimable {
+    @apply bg-blue-400;
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
+  }
+  
+  .orbit-ball-completed {
+    @apply bg-amber-400;
+    box-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
+  }
+  
+  .orbit-ball-progress {
+    @apply bg-slate-400;
+  }
+}
