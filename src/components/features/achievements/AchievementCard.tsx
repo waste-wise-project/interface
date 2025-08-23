@@ -9,23 +9,6 @@ export default function AchievementCard({
 	achievement: Achievement;
 	index: number;
 }) {
-	// 根据等级获取背景渐变 - 优化颜色方案
-	const getTierGradient = (tier: string) => {
-		switch (tier) {
-			case 'bronze':
-				return 'from-orange-400 to-amber-500';
-			case 'silver':
-				return 'from-slate-400 to-slate-600';
-			case 'gold':
-				return 'from-amber-400 to-yellow-500';
-			case 'platinum':
-				return 'from-blue-400 to-indigo-500';
-			case 'diamond':
-				return 'from-purple-400 to-pink-500';
-			default:
-				return 'from-gray-400 to-gray-600';
-		}
-	};
 
 	// 根据状态获取样式 - 参考图片设计
 	const getStatusStyle = () => {
@@ -46,7 +29,6 @@ export default function AchievementCard({
 	};
 
 	const status = getStatusStyle();
-	const tierGradient = getTierGradient(achievement.tier);
 
 	return (
 		<motion.div

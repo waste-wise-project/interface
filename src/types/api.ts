@@ -1,4 +1,4 @@
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
 	success: boolean;
 	data: T;
 	message?: string;
@@ -80,7 +80,7 @@ export interface Achievement {
 	iconUrl: string;
 	category: string;
 	tier: string;
-	requirements: Record<string, any>;
+	requirements: Record<string, unknown>;
 	progress: number;
 	isCompleted: boolean;
 	isClaimed: boolean;

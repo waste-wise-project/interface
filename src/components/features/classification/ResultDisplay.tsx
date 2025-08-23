@@ -1,11 +1,12 @@
 import { WasteCategoryToCNMap } from '@/lib/constants';
 import { motion } from 'framer-motion';
+import { ClassificationResult } from '@/types/api';
 
 export default function ResultDisplay({
 	result,
 	onReset,
 }: {
-	result: any;
+	result: ClassificationResult;
 	onReset: () => void;
 }) {
 	const expectedCategoryOfCN =

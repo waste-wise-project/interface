@@ -15,10 +15,8 @@ export function NFTCollection({ className = '' }: NFTCollectionProps) {
 	const {
 		eligibleNfts,
 		ownedNfts,
-		nftClaims,
 		isLoadingEligible,
 		isLoadingOwned,
-		isLoadingClaims,
 		isClaiming,
 		error,
 		fetchEligibleNfts,
@@ -35,7 +33,7 @@ export function NFTCollection({ className = '' }: NFTCollectionProps) {
 			fetchOwnedNfts(walletAddress);
 			fetchNftClaims(walletAddress);
 		}
-	}, [isConnected, walletAddress]);
+	}, [isConnected, walletAddress, fetchEligibleNfts, fetchOwnedNfts, fetchNftClaims]);
 
 	// 处理领取NFT
 	const handleClaimNft = async (nftPoolId: number) => {
@@ -43,7 +41,7 @@ export function NFTCollection({ className = '' }: NFTCollectionProps) {
 
 		try {
 			await claimNft(walletAddress, nftPoolId);
-		} catch (error) {
+		} catch {
 			// 错误已经在store中处理
 		}
 	};

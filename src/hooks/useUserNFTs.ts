@@ -14,7 +14,7 @@ export interface NFTMetadata {
 		trait_type: string;
 		value: string | number;
 	}>;
-	[key: string]: any;
+	[key: string]: unknown;
 }
 
 export interface NFTWithMetadata {

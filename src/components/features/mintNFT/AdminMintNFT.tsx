@@ -109,11 +109,10 @@ export default function AdminMintNFT({ className = '' }: AdminMintNFTProps) {
 			setTimeout(() => {
 				clearForm();
 			}, 2000);
-		} catch (error: any) {
+		} catch (error: unknown) {
 			console.error('铸造NFT失败:', error);
-			setMessage(
-				`❌ 铸造失败: ${error.message || '网络错误，请检查后端服务并稍后重试'}`
-			);
+			const errorMessage = error instanceof Error ? error.message : '网络错误，请检查后端服务并稍后重试';
+			setMessage(`❌ 铸造失败: ${errorMessage}`);
 			setMessageType('error');
 		} finally {
 			setIsLoading(false);

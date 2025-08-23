@@ -31,7 +31,7 @@ apiClient.interceptors.request.use((config) => {
 
 // 响应拦截器 - 统一处理响应格式
 apiClient.interceptors.response.use(
-	(response: AxiosResponse<ApiResponse<any>>) => {
+	(response) => {
 		// 直接返回处理后的数据
 		return handleApiResponse(response);
 	},
