@@ -31,14 +31,14 @@ export default function AchievementCard({
 	const getStatusStyle = () => {
 		if (achievement.isCompleted) {
 			return {
-				bg: 'bg-gray-500',
+				bg: 'bg-green-500',
 				text: 'text-white',
 				label: '已完成',
 				icon: '',
 			};
 		}
 		return {
-			bg: 'bg-gray-500',
+			bg: 'bg-blue-500',
 			text: 'text-white',
 			label: '进行中',
 			icon: '',
@@ -77,7 +77,7 @@ export default function AchievementCard({
 							duration: 1,
 							ease: 'easeOut',
 						}}
-						className={`h-full bg-gradient-to-r ${tierGradient} rounded-tl-3xl shadow-sm`}
+						className={`h-full bg-gradient-to-r ${status.bg} rounded-tl-3xl shadow-sm`}
 					/>
 				</div>
 
@@ -103,9 +103,9 @@ export default function AchievementCard({
 
 							{/* 等级徽章 - 调整位置 */}
 							<div
-								className={`absolute -top-1 -right-1 w-8 h-8 rounded-full bg-gradient-to-r ${tierGradient} flex items-center justify-center text-white text-xs font-bold shadow-lg z-20 border-2 border-white`}
+								className={`absolute -top-1 -right-1 w-8 h-8 rounded-full bg-gradient-to-r ${status.bg} flex items-center justify-center text-white text-xs font-bold shadow-lg z-20 border-2 border-white`}
 							>
-								{achievement.tier === 'bronze' && '🥉'}
+								{achievement.tier === '1' && '🥉'}
 								{achievement.tier === 'silver' && '🥈'}
 								{achievement.tier === 'gold' && '🥇'}
 								{achievement.tier === 'platinum' && '💎'}
@@ -172,9 +172,9 @@ export default function AchievementCard({
 							<motion.button
 								whileHover={{ scale: 1.05 }}
 								whileTap={{ scale: 0.95 }}
-								className={`bg-gradient-to-r ${tierGradient} text-white px-4 py-2 rounded-full text-xs font-bold shadow-md hover:shadow-lg transition-all duration-300`}
+								className={`bg-gradient-to-r ${status.bg} text-white px-4 py-2 rounded-full text-xs font-bold shadow-md hover:shadow-lg transition-all duration-300`}
 							>
-								领取奖励
+								已领取奖励
 							</motion.button>
 						)}
 					</div>
