@@ -29,22 +29,6 @@ export default function AchievementCard({
 
 	// 根据状态获取样式 - 参考图片设计
 	const getStatusStyle = () => {
-		if (achievement.isClaimed) {
-			return {
-				bg: 'bg-gray-500',
-				text: 'text-white',
-				label: '进行中',
-				icon: '',
-			};
-		}
-		if (achievement.canClaim) {
-			return {
-				bg: 'bg-gray-500',
-				text: 'text-white',
-				label: '进行中',
-				icon: '',
-			};
-		}
 		if (achievement.isCompleted) {
 			return {
 				bg: 'bg-gray-500',
