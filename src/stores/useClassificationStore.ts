@@ -85,30 +85,27 @@ export const useClassificationStore = create<ClassificationState>()(
 				}));
 
 				try {
-					// TODO: 调用真实的agent 接口
-					// const result: ClassificationResult = await apiClient.post(
-					// 	'/classification',
-					// 	{
-					// 		imageUrl: currentClassification.imageUrl,
-					// 		expectedCategory: currentClassification.selectedCategory,
-					// 		walletAddress,
-					// 	}
-					// );
+					// 调用后端分类接口
+					const response: ClassificationResult = await apiClient.post(
+						'/classification',
+						{
+							imageUrl: currentClassification.imageUrl,
+							expectedCategory: currentClassification.selectedCategory,
+							walletAddress,
+						}
+					);
 
-					// set((state) => ({
-					// 	currentClassification: {
-					// 		...state.currentClassification,
-					// 		result,
-					// 		isSubmitting: false,
-					// 	},
-					// 	history: [result, ...state.history],
-					// }));
+					set((state) => ({
+						currentClassification: {
+							...state.currentClassification,
+							isSubmitting: false,
+							result: response,
+						},
+						// 将新结果添加到历史记录开头
+						history: [response, ...state.history.slice(0, 19)], // 保持最多20条记录
+					}));
 
-					// // 重新加载统计数据
-					// await get().loadStats(walletAddress);
-
-					// return result;
-					return {} as ClassificationResult;
+					return response;
 				} catch (error) {
 					set((state) => ({
 						currentClassification: {
@@ -124,12 +121,12 @@ export const useClassificationStore = create<ClassificationState>()(
 				set({ isLoadingHistory: true });
 
 				try {
-					const history: ClassificationResult[] = await apiClient.get(
-						'/classification',
-						{
-							params: { walletAddress, limit: 20 },
-						}
-					);
+					const response = await apiClient.get('/classification/history', {
+						params: { walletAddress, limit: 20 },
+					});
+					
+					// 后端返回分页数据，我们取 data 字段中的历史记录
+					const history: ClassificationResult[] = response.data || [];
 					set({ history, isLoadingHistory: false });
 				} catch (error) {
 					console.error('Failed to load classification history:', error);
