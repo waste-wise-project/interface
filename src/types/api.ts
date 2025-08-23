@@ -17,8 +17,16 @@ export interface ClassificationResult {
 	characteristics: string[];
 	materialType: string;
 	disposalInstructions: string;
+	detailedAnalysis: string;
+	learningPoints: string[];
+	suggestions: string[];
+	improvementTips: string[];
+	walletAddress: string;
+	userLocation?: string;
+	deviceInfo?: string;
 	availableNfts?: NFTReward[];
 	createdAt: string;
+	updatedAt: string;
 }
 
 export interface NFTReward {
@@ -29,12 +37,38 @@ export interface NFTReward {
 	rarity: number;
 }
 
+export interface CategoryStatsItem {
+	total: number;
+	correct: number;
+	accuracy: number;
+}
+
+export interface CategoryBreakdown {
+	recyclable: CategoryStatsItem;
+	hazardous: CategoryStatsItem;
+	kitchen: CategoryStatsItem;
+	other: CategoryStatsItem;
+}
+
+export interface AvailableAchievement {
+	id: number;
+	name: string;
+	description: string;
+	progress: number;
+	target: number;
+}
+
 export interface ClassificationStats {
 	totalClassifications: number;
 	correctClassifications: number;
+	accuracyRate: number;
 	totalScore: number;
-	accuracy: number;
-	streakCount: number;
+	averageScore: number;
+	categoryBreakdown: CategoryBreakdown;
+	recentClassifications: ClassificationResult[];
+	achievements: {
+		canEarn: AvailableAchievement[];
+	};
 }
 
 export interface Achievement {

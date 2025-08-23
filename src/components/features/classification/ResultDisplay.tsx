@@ -1,3 +1,4 @@
+import { WasteCategoryToCNMap } from '@/lib/constants';
 import { motion } from 'framer-motion';
 
 export default function ResultDisplay({
@@ -7,6 +8,12 @@ export default function ResultDisplay({
 	result: any;
 	onReset: () => void;
 }) {
+	const expectedCategoryOfCN =
+		WasteCategoryToCNMap[
+			result.expectedCategory as keyof typeof WasteCategoryToCNMap
+		] || result.expectedCategory;
+
+	console.log(expectedCategoryOfCN, 'expectedCategoryOfCN');
 	return (
 		<motion.div
 			initial={{ opacity: 0, y: 20 }}
@@ -14,7 +21,7 @@ export default function ResultDisplay({
 			className='bg-white rounded-lg shadow-lg p-8'
 		>
 			<div className='text-center mb-6'>
-				<div className='text-6xl mb-4'>{result.isCorrect ? '🎉' : '😅'}</div>
+				<div className='text-6xl mb-4'>{result.isCorrect ? '🎉' : '😔'}</div>
 				<h2 className='text-2xl font-bold mb-2'>
 					{result.isCorrect ? '分类正确！' : '分类错误'}
 				</h2>
@@ -35,7 +42,7 @@ export default function ResultDisplay({
 
 				<div>
 					<h3 className='font-semibold mb-2'>你的选择</h3>
-					<p className='text-lg'>{result.expectedCategory}</p>
+					<p className='text-lg'>{expectedCategoryOfCN}</p>
 				</div>
 			</div>
 

@@ -1,4 +1,4 @@
-import AdminMintNFT from '@/components/AdminMintNFT';
+import { AdminMintNFT } from '@/components/features/mintNFT';
 
 const Pages = () => {
 	return (

@@ -9,55 +9,55 @@ export default function AchievementCard({
 	achievement: Achievement;
 	index: number;
 }) {
-	// 根据等级获取背景渐变 - Tailwind v4 兼容
+	// 根据等级获取背景渐变 - 优化颜色方案
 	const getTierGradient = (tier: string) => {
 		switch (tier) {
 			case 'bronze':
-				return 'from-amber-300 via-orange-400 to-amber-600';
+				return 'from-orange-400 to-amber-500';
 			case 'silver':
-				return 'from-slate-300 via-gray-400 to-slate-500';
+				return 'from-slate-400 to-slate-600';
 			case 'gold':
-				return 'from-yellow-300 via-amber-400 to-yellow-600';
+				return 'from-amber-400 to-yellow-500';
 			case 'platinum':
-				return 'from-slate-200 via-blue-300 to-slate-400';
+				return 'from-blue-400 to-indigo-500';
 			case 'diamond':
-				return 'from-cyan-200 via-blue-300 to-indigo-400';
+				return 'from-purple-400 to-pink-500';
 			default:
-				return 'from-slate-300 via-gray-400 to-slate-500';
+				return 'from-gray-400 to-gray-600';
 		}
 	};
 
-	// 根据状态获取样式
+	// 根据状态获取样式 - 参考图片设计
 	const getStatusStyle = () => {
 		if (achievement.isClaimed) {
 			return {
-				bg: 'bg-emerald-500',
+				bg: 'bg-gray-500',
 				text: 'text-white',
-				label: '已领取',
-				icon: '✓',
+				label: '进行中',
+				icon: '',
 			};
 		}
 		if (achievement.canClaim) {
 			return {
-				bg: 'bg-blue-500',
+				bg: 'bg-gray-500',
 				text: 'text-white',
-				label: '可领取',
-				icon: '🎁',
+				label: '进行中',
+				icon: '',
 			};
 		}
 		if (achievement.isCompleted) {
 			return {
-				bg: 'bg-amber-500',
+				bg: 'bg-gray-500',
 				text: 'text-white',
 				label: '已完成',
-				icon: '★',
+				icon: '',
 			};
 		}
 		return {
-			bg: 'bg-slate-400',
+			bg: 'bg-gray-500',
 			text: 'text-white',
 			label: '进行中',
-			icon: '⏳',
+			icon: '',
 		};
 	};
 
@@ -75,120 +75,51 @@ export default function AchievementCard({
 				damping: 12,
 			}}
 			whileHover={{
-				y: -8,
-				transition: { duration: 0.3 },
+				y: -6,
+				scale: 1.02,
+				transition: { duration: 0.2 },
 			}}
-			className='relative group cursor-pointer'
+			className='relative group cursor-pointer w-full'
 		>
-			{/* 主卡片 */}
-			<div className='bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-200/60'>
-				{/* 顶部装饰条 */}
-				<div className={`h-2 bg-gradient-to-r ${tierGradient}`} />
+			{/* 主卡片 - 优化视觉层次 */}
+			<div className='bg-white rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200/30 relative backdrop-blur-sm'>
+				{/* 顶部进度条背景 */}
+				<div className='absolute top-0 left-0 right-0 h-1.5 bg-gray-200/50 rounded-t-3xl'>
+					<motion.div
+						initial={{ width: 0 }}
+						animate={{ width: `${achievement.progress}%` }}
+						transition={{
+							delay: index * 0.1 + 0.5,
+							duration: 1,
+							ease: 'easeOut',
+						}}
+						className={`h-full bg-gradient-to-r ${tierGradient} rounded-tl-3xl shadow-sm`}
+					/>
+				</div>
 
-				<div className='p-6'>
+				<div className='pt-8 pb-5 px-6'>
 					{/* 图标和状态区域 */}
-					<div className='flex items-start justify-between mb-6'>
-						{/* 图标容器 */}
+					<div className='flex items-start justify-between mb-4'>
+						{/* 图标容器 - 重新设计突出图片美感 */}
 						<div className='relative'>
-							{/* 旋转装饰球 - 外圈 */}
-							<div className='absolute inset-0 w-20 h-20'>
-								{[...Array(3)].map((_, i) => (
-									<motion.div
-										key={`outer-${i}`}
-										className={`absolute w-2 h-2 rounded-full shadow-sm ${
-											achievement.canClaim
-												? 'bg-blue-400'
-												: achievement.isCompleted
-												? 'bg-amber-400'
-												: 'bg-slate-400'
-										}`}
-										style={{
-											top: '50%',
-											left: '50%',
-											transformOrigin: '0 0',
-										}}
-										animate={{
-											rotate: 360,
-											x:
-												Math.cos(((i * 120 + index * 30) * Math.PI) / 180) *
-													40 -
-												4,
-											y:
-												Math.sin(((i * 120 + index * 30) * Math.PI) / 180) *
-													40 -
-												4,
-										}}
-										transition={{
-											rotate: {
-												duration: 4 + i * 0.3,
-												repeat: Infinity,
-												ease: 'linear',
-											},
-											x: { duration: 0 },
-											y: { duration: 0 },
-										}}
-									/>
-								))}
-							</div>
-
-							{/* 旋转装饰球 - 内圈 */}
-							<div className='absolute inset-0 w-20 h-20'>
-								{[...Array(2)].map((_, i) => (
-									<motion.div
-										key={`inner-${i}`}
-										className={`absolute w-1.5 h-1.5 rounded-full ${
-											achievement.canClaim
-												? 'bg-blue-300'
-												: achievement.isCompleted
-												? 'bg-amber-300'
-												: 'bg-slate-300'
-										}`}
-										style={{
-											top: '50%',
-											left: '50%',
-											transformOrigin: '0 0',
-										}}
-										animate={{
-											rotate: -360,
-											x:
-												Math.cos(((i * 180 + index * 45) * Math.PI) / 180) *
-													28 -
-												3,
-											y:
-												Math.sin(((i * 180 + index * 45) * Math.PI) / 180) *
-													28 -
-												3,
-										}}
-										transition={{
-											rotate: {
-												duration: 6 + i * 0.5,
-												repeat: Infinity,
-												ease: 'linear',
-											},
-											x: { duration: 0 },
-											y: { duration: 0 },
-										}}
-									/>
-								))}
-							</div>
-
-							<div
-								className={`w-20 h-20 rounded-full bg-gradient-to-br ${tierGradient} p-1 shadow-lg relative z-10`}
-							>
-								<div className='w-full h-full bg-white rounded-full flex items-center justify-center'>
+							{/* 图标容器 - 更大更美观 */}
+							<div className='w-24 h-24 rounded-2xl bg-gradient-to-br from-white to-gray-50 p-0.5 shadow-lg relative z-10 border border-gray-200/60'>
+								<div className='w-full h-full bg-white rounded-2xl flex items-center justify-center overflow-hidden shadow-inner'>
 									<Image
 										src={achievement.iconUrl}
 										alt={achievement.name}
-										width={48}
-										height={48}
-										className='object-contain'
+										width={80}
+										height={80}
+										className='object-cover w-full h-full rounded-xl'
 										onError={() => '/window.svg'}
+										priority={index < 6}
 									/>
 								</div>
 							</div>
-							{/* 等级徽章 */}
+
+							{/* 等级徽章 - 调整位置 */}
 							<div
-								className={`absolute -top-1 -right-1 w-6 h-6 rounded-full bg-gradient-to-r ${tierGradient} flex items-center justify-center text-white text-xs font-bold shadow-md z-20`}
+								className={`absolute -top-1 -right-1 w-8 h-8 rounded-full bg-gradient-to-r ${tierGradient} flex items-center justify-center text-white text-xs font-bold shadow-lg z-20 border-2 border-white`}
 							>
 								{achievement.tier === 'bronze' && '🥉'}
 								{achievement.tier === 'silver' && '🥈'}
@@ -200,75 +131,64 @@ export default function AchievementCard({
 
 						{/* 状态标签 */}
 						<div
-							className={`${status.bg} ${status.text} px-3 py-2 rounded-full text-xs font-semibold shadow-lg flex items-center gap-1`}
+							className={`${status.bg} ${status.text} px-3 py-1.5 rounded-full text-xs font-medium shadow-sm`}
 						>
-							<span>{status.icon}</span>
-							<span>{status.label}</span>
+							{status.label}
 						</div>
 					</div>
 
-					{/* 成就信息 */}
-					<div className='mb-6'>
-						<h3 className='font-bold text-xl mb-2 text-slate-800 group-hover:text-slate-900 transition-colors'>
+					{/* 成就信息 - 更精致的布局 */}
+					<div className='mb-5'>
+						<h3 className='font-bold text-xl mb-2 text-gray-900 group-hover:text-gray-800 transition-colors'>
 							{achievement.name}
 						</h3>
-						<p className='text-slate-600 text-sm leading-relaxed'>
+						<p className='text-gray-600 text-sm leading-relaxed mb-4'>
 							{achievement.description}
 						</p>
-					</div>
 
-					{/* 进度区域 */}
-					<div className='mb-6'>
+						{/* 进度文字 */}
 						<div className='flex justify-between items-center mb-3'>
-							<span className='text-sm font-medium text-slate-700'>进度</span>
-							<span className='text-sm font-bold text-slate-800'>
+							<span className='text-sm font-medium text-gray-700'>进度</span>
+							<span className='text-lg font-bold text-gray-900'>
 								{achievement.progress}%
 							</span>
 						</div>
 
-						{/* 美化的进度条 */}
-						<div className='relative w-full bg-slate-200 rounded-full h-3 overflow-hidden'>
+						{/* 进度条 - 更加精致 */}
+						<div className='relative w-full bg-gray-100 rounded-full h-2.5 overflow-hidden shadow-inner'>
 							<motion.div
 								initial={{ width: 0 }}
 								animate={{ width: `${achievement.progress}%` }}
 								transition={{
 									delay: index * 0.1 + 0.5,
-									duration: 1,
+									duration: 1.2,
 									ease: 'easeOut',
 								}}
-								className={`h-full bg-gradient-to-r ${tierGradient} rounded-full relative overflow-hidden`}
+								className='h-full bg-gray-300 rounded-full relative overflow-hidden'
 							>
 								{/* 进度条光效 */}
-								<div className='absolute inset-0 bg-white/30 animate-pulse' />
-								<div
-									className='absolute top-0 left-0 h-full w-1/3 opacity-50 animate-pulse'
-									style={{
-										background:
-											'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.8) 50%, transparent 100%)',
-									}}
-								/>
+								<div className='absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse' />
 							</motion.div>
 						</div>
 					</div>
 
-					{/* 底部操作区域 */}
-					<div className='flex justify-between items-center'>
-						{/* 奖励信息 */}
+					{/* 底部积分区域 - 更精致的设计 */}
+					<div className='flex items-center justify-between pt-3 border-t border-gray-100/80'>
 						<div className='flex items-center gap-2'>
-							<div className='w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center'>
+							<div className='w-8 h-8 bg-gradient-to-br from-amber-100 to-amber-200 rounded-full flex items-center justify-center shadow-sm'>
 								<span className='text-amber-600 text-sm'>💰</span>
 							</div>
-							<span className='text-sm font-semibold text-slate-700'>
+							<span className='text-sm font-bold text-gray-800'>
 								+{achievement.scoreReward} 积分
 							</span>
 						</div>
 
-						{/* 领取按钮 */}
+						{/* 可领取按钮 */}
 						{achievement.canClaim && !achievement.isClaimed && (
 							<motion.button
 								whileHover={{ scale: 1.05 }}
 								whileTap={{ scale: 0.95 }}
-								className={`bg-gradient-to-r ${tierGradient} text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg hover:shadow-xl transition-all duration-300`}
+								className={`bg-gradient-to-r ${tierGradient} text-white px-4 py-2 rounded-full text-xs font-bold shadow-md hover:shadow-lg transition-all duration-300`}
 							>
 								领取奖励
 							</motion.button>
@@ -276,20 +196,80 @@ export default function AchievementCard({
 					</div>
 				</div>
 
-				{/* 悬浮时的光效 */}
+				{/* 悬浮时的微妙光效 */}
 				<div className='absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none'>
-					<div
-						className={`absolute inset-0 bg-gradient-to-br ${tierGradient} opacity-5 rounded-xl`}
-					/>
+					<div className='absolute inset-0 bg-gradient-to-br from-blue-50 to-purple-50 opacity-30 rounded-3xl' />
+				</div>
+
+				{/* 围绕积分区域运动的装饰小球 */}
+				<div className='absolute bottom-3 left-6 w-40 h-12 pointer-events-none'>
+					{/* 外圈装饰球 */}
+					{[...Array(2)].map((_, i) => (
+						<motion.div
+							key={`score-outer-${i}`}
+							className={`absolute w-1.5 h-1.5 rounded-full shadow-sm ${
+								achievement.canClaim
+									? 'bg-blue-400'
+									: achievement.isCompleted
+									? 'bg-amber-400'
+									: 'bg-gray-400'
+							}`}
+							style={{
+								top: '50%',
+								left: '20%',
+								transformOrigin: '0 0',
+							}}
+							animate={{
+								rotate: 360,
+								x: Math.cos(((i * 180 + index * 60) * Math.PI) / 180) * 45 - 3,
+								y: Math.sin(((i * 180 + index * 60) * Math.PI) / 180) * 20 - 3,
+							}}
+							transition={{
+								rotate: {
+									duration: 8 + i * 0.1,
+									repeat: Infinity,
+									ease: 'linear',
+								},
+								x: { duration: 0 },
+								y: { duration: 0 },
+							}}
+						/>
+					))}
+
+					{/* 内圈装饰球 */}
+					{[...Array(3)].map((_, i) => (
+						<motion.div
+							key={`score-inner-${i}`}
+							className={`absolute w-1 h-1 rounded-full ${
+								achievement.canClaim
+									? 'bg-blue-300'
+									: achievement.isCompleted
+									? 'bg-amber-300'
+									: 'bg-gray-300'
+							}`}
+							style={{
+								top: '50%',
+								left: '20%',
+								transformOrigin: '0 0',
+							}}
+							animate={{
+								rotate: -360,
+								x: Math.cos(((i * 120 + index * 45) * Math.PI) / 180) * 32 - 2,
+								y: Math.sin(((i * 120 + index * 45) * Math.PI) / 180) * 15 - 2,
+							}}
+							transition={{
+								rotate: {
+									duration: 12 + i * 0.1,
+									repeat: Infinity,
+									ease: 'linear',
+								},
+								x: { duration: 0 },
+								y: { duration: 0 },
+							}}
+						/>
+					))}
 				</div>
 			</div>
-
-			{/* 卡片外部光晕效果 */}
-			{achievement.canClaim && (
-				<div
-					className={`absolute inset-0 bg-gradient-to-r ${tierGradient} opacity-20 blur-xl rounded-xl -z-10 animate-pulse`}
-				/>
-			)}
 		</motion.div>
 	);
 }
