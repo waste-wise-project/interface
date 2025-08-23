@@ -67,9 +67,10 @@ export const useNftStore = create<NftState>()(
 				try {
 					const eligibleNfts = await nftApiService.getEligibleNfts(walletAddress);
 					set({ eligibleNfts, isLoadingEligible: false });
-				} catch (error: any) {
+				} catch (error: unknown) {
+					const errorMessage = error instanceof Error ? error.message : '获取可领取NFT失败';
 					set({ 
-						error: error.message || '获取可领取NFT失败', 
+						error: errorMessage, 
 						isLoadingEligible: false 
 					});
 				}
@@ -80,9 +81,10 @@ export const useNftStore = create<NftState>()(
 				try {
 					const ownedNfts = await nftApiService.getOwnedNfts(walletAddress);
 					set({ ownedNfts, isLoadingOwned: false });
-				} catch (error: any) {
+				} catch (error: unknown) {
+					const errorMessage = error instanceof Error ? error.message : '获取拥有的NFT失败';
 					set({ 
-						error: error.message || '获取拥有的NFT失败', 
+						error: errorMessage, 
 						isLoadingOwned: false 
 					});
 				}
@@ -93,9 +95,10 @@ export const useNftStore = create<NftState>()(
 				try {
 					const nftClaims = await nftApiService.getNftClaims(walletAddress);
 					set({ nftClaims, isLoadingClaims: false });
-				} catch (error: any) {
+				} catch (error: unknown) {
+					const errorMessage = error instanceof Error ? error.message : '获取领取记录失败';
 					set({ 
-						error: error.message || '获取领取记录失败', 
+						error: errorMessage, 
 						isLoadingClaims: false 
 					});
 				}
@@ -106,9 +109,10 @@ export const useNftStore = create<NftState>()(
 				try {
 					const poolStats = await nftApiService.getPoolStats();
 					set({ poolStats, isLoadingStats: false });
-				} catch (error: any) {
+				} catch (error: unknown) {
+					const errorMessage = error instanceof Error ? error.message : '获取NFT池统计失败';
 					set({ 
-						error: error.message || '获取NFT池统计失败', 
+						error: errorMessage, 
 						isLoadingStats: false 
 					});
 				}
@@ -120,8 +124,9 @@ export const useNftStore = create<NftState>()(
 					await nftApiService.reserveNft({ walletAddress, nftPoolId });
 					// 重新获取可领取NFT列表以更新状态
 					get().fetchEligibleNfts(walletAddress);
-				} catch (error: any) {
-					set({ error: error.message || '预留NFT失败' });
+				} catch (error: unknown) {
+					const errorMessage = error instanceof Error ? error.message : '预留NFT失败';
+					set({ error: errorMessage });
 					throw error;
 				}
 			},
@@ -153,9 +158,10 @@ export const useNftStore = create<NftState>()(
 					get().fetchOwnedNfts(walletAddress);
 					
 					return result;
-				} catch (error: any) {
+				} catch (error: unknown) {
+					const errorMessage = error instanceof Error ? error.message : '领取NFT失败';
 					set({ 
-						error: error.message || '领取NFT失败', 
+						error: errorMessage, 
 						isClaiming: false 
 					});
 					throw error;

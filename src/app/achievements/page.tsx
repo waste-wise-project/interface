@@ -3,21 +3,17 @@
 import { useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import { useAchievementStore } from '@/stores/useAchievementStore';
-import { motion } from 'framer-motion';
 import { Trophy } from 'lucide-react';
-import AchievementCard from '@/components/features/achievements/AchievementCard';
 import AchievementList from '@/components/features/achievements/AchievementList';
 
 export default function AchievementsPage() {
 	const { address, isConnected } = useAccount();
 	const {
-		achievements,
 		isLoading,
 		filter,
 		setFilter,
 		loadAchievements,
 		getFilteredAchievements,
-		getCompletionRate,
 	} = useAchievementStore();
 
 	useEffect(() => {
@@ -39,7 +35,6 @@ export default function AchievementsPage() {
 	}
 
 	const filteredAchievements = getFilteredAchievements();
-	const completionRate = getCompletionRate();
 
 	return (
 		<div className='min-h-screen bg-gray-50 py-8'>
@@ -57,7 +52,7 @@ export default function AchievementsPage() {
 						].map((tab) => (
 							<button
 								key={tab.value}
-								onClick={() => setFilter(tab.value as any)}
+								onClick={() => setFilter(tab.value as 'all' | 'completed' | 'claimable' | 'claimed')}
 								className={`px-4 py-2 rounded-lg font-medium transition-colors ${
 									filter === tab.value
 										? 'bg-blue-600 text-white'

@@ -8,7 +8,7 @@ import { useWasteImageUpload } from '@/hooks/useWasteImageUpload';
 import { useToast } from '@/hooks/useToast';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { Upload, Loader2, CheckCircle, XCircle, X } from 'lucide-react';
+import { Upload, Loader2, CheckCircle, X } from 'lucide-react';
 import ResultDisplay from './ResultDisplay';
 
 const WASTE_CATEGORIES = [
@@ -42,7 +42,6 @@ export default function WasteClassificationForm() {
 		error: uploadError,
 	} = useWasteImageUpload();
 	const [localPreview, setLocalPreview] = useState<string | null>(null);
-	const [uploadedPath, setUploadedPath] = useState<string | null>(null);
 
 	// 文件上传处理
 	const onDrop = useCallback(
@@ -60,7 +59,6 @@ export default function WasteClassificationForm() {
 
 				// 上传成功后更新URL
 				setImageUrl(result.url);
-				setUploadedPath(result.path);
 
 				// 清理本地预览
 				URL.revokeObjectURL(previewUrl);
@@ -132,7 +130,6 @@ export default function WasteClassificationForm() {
 	const clearImage = () => {
 		setImageUrl(null);
 		setLocalPreview(null);
-		setUploadedPath(null);
 
 		// 清理本地预览URL
 		if (localPreview) {

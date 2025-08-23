@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, use } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
 	useAccount,
 	useWriteContract,
@@ -290,31 +290,16 @@ export function useWasteWiseContract(): WasteWiseContractReturn {
 
 	// 获取NFT信息
 	const getNFTInfo = useCallback(
-		async (tokenId: number): Promise<NFTInfo | null> => {
+		async (_tokenId: number): Promise<NFTInfo | null> => {
 			updateState({ isLoading: true, error: null });
 
 			try {
-				// 创建单个NFT查询
-				const singleNFTContracts = [
-					{
-						address: CONTRACT_ADDRESS,
-						abi: WASTE_WISE_ABI,
-						functionName: 'exists',
-						args: [BigInt(tokenId)],
-					},
-					{
-						address: CONTRACT_ADDRESS,
-						abi: WASTE_WISE_ABI,
-						functionName: 'ownerOf',
-						args: [BigInt(tokenId)],
-					},
-					{
-						address: CONTRACT_ADDRESS,
-						abi: WASTE_WISE_ABI,
-						functionName: 'tokenURI',
-						args: [BigInt(tokenId)],
-					},
-				];
+				// 创建单个NFT查询 - TODO: implement with useReadContracts
+				// const singleNFTContracts = [
+				//   { address: CONTRACT_ADDRESS, abi: WASTE_WISE_ABI, functionName: 'exists', args: [BigInt(tokenId)] },
+				//   { address: CONTRACT_ADDRESS, abi: WASTE_WISE_ABI, functionName: 'ownerOf', args: [BigInt(tokenId)] },
+				//   { address: CONTRACT_ADDRESS, abi: WASTE_WISE_ABI, functionName: 'tokenURI', args: [BigInt(tokenId)] },
+				// ];
 
 				// 使用 useReadContracts 但需要在组件外部，这里我们模拟等待结果
 				// 实际应用中，你可能需要创建一个单独的 hook 或使用状态管理
@@ -344,7 +329,7 @@ export function useWasteWiseContract(): WasteWiseContractReturn {
 
 	// 检查NFT是否存在 - 需要在组件中使用 useReadContract
 	const checkNFTExists = useCallback(
-		async (tokenId: number): Promise<boolean> => {
+		async (_tokenId: number): Promise<boolean> => {
 			// 这个函数需要在组件中单独实现 useReadContract
 			// 这里返回 false 作为默认值
 			console.warn('checkNFTExists 需要在组件中使用 useReadContract 实现');
