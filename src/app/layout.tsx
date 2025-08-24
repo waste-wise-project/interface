@@ -66,7 +66,7 @@ export default function RootLayout({
 										<div className='flex items-center space-x-2 mb-4'>
 											<span className='text-2xl'>🌱</span>
 											<span className='text-xl font-bold text-green-400'>
-												WasteToNFT
+												WasteWise
 											</span>
 										</div>
 										<p className='text-gray-400 text-sm'>
