@@ -12,7 +12,7 @@ interface NFTFormProps {
 
 export function NFTForm({ formData, setFormData, isLoading }: NFTFormProps) {
 	const updateFormData = (field: keyof NFTFormData, value: string | number) => {
-		setFormData(prev => ({
+		setFormData((prev) => ({
 			...prev,
 			[field]: value,
 		}));
@@ -118,6 +118,23 @@ export function NFTForm({ formData, setFormData, isLoading }: NFTFormProps) {
 							⭐⭐⭐⭐⭐ 5 - {nftApiService.formatRarity(5)}
 						</option>
 					</select>
+				</div>
+
+				<div>
+					<label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
+						需要积分
+					</label>
+					<input
+						type='number'
+						min='0'
+						step='1'
+						value={formData.requiredScore}
+						onChange={(e) =>
+							updateFormData('requiredScore', Number(e.target.value))
+						}
+						disabled={isLoading}
+						className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 dark:disabled:bg-gray-600 transition-colors'
+					/>
 				</div>
 			</div>
 
