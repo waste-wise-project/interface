@@ -208,6 +208,13 @@ class NFTApiService {
   }
 
   /**
+   * 获取稀有度标签
+   */
+  getRarityLabel(rarity: number): string {
+    return NFT_RARITY_LABELS[rarity] || '未知';
+  }
+
+  /**
    * 格式化类别显示
    */
   formatCategory(category: string): string {
