@@ -134,6 +134,13 @@ export const useNftStore = create<NftState>()(
 			claimNft: async (walletAddress: string, nftPoolId: number) => {
 				set({ isClaiming: true, error: null });
 				try {
+					// 先预留NFT
+					await nftApiService.reserveNft({ walletAddress, nftPoolId });
+					
+					// 稍等片刻确保预留完成
+					await new Promise(resolve => setTimeout(resolve, 500));
+					
+					// 再领取NFT
 					const result = await nftApiService.claimNft({ walletAddress, nftPoolId });
 					
 					// 更新本地状态

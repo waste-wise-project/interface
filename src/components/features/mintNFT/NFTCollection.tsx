@@ -3,8 +3,7 @@
 import { useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import { useNftStore } from '@/stores/useNftStore';
-import nftApiService from '@/services/nftApi';
-import Image from 'next/image';
+import NFTCard from './NFTCard';
 
 interface NFTCollectionProps {
 	className?: string;
@@ -25,6 +24,7 @@ export function NFTCollection({ className = '' }: NFTCollectionProps) {
 		claimNft,
 		clearError,
 	} = useNftStore();
+
 
 	// 加载数据
 	useEffect(() => {
@@ -103,69 +103,16 @@ export function NFTCollection({ className = '' }: NFTCollectionProps) {
 						</p>
 					</div>
 				) : (
-					<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
-						{eligibleNfts.map((nft) => (
-							<div
+					<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+						{eligibleNfts.map((nft, index) => (
+							<NFTCard
 								key={nft.id}
-								className='bg-white rounded-lg shadow-md p-4 border'
-							>
-								{nft.imageUrl && (
-									<Image
-										width={512}
-										height={512}
-										src={nft.imageUrl}
-										alt={nft.name}
-										className='w-full h-48 object-cover rounded-lg mb-3'
-									/>
-								)}
-								<h4 className='font-semibold text-gray-900 mb-2'>{nft.name}</h4>
-								<p className='text-sm text-gray-600 mb-3 line-clamp-2'>
-									{nft.description}
-								</p>
-
-								{/* NFT属性 */}
-								<div className='flex flex-wrap gap-1 mb-3'>
-									<span
-										className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${nftApiService.getRarityColor(
-											nft.rarity
-										)}`}
-									>
-										{'⭐'.repeat(nft.rarity)}
-									</span>
-									<span className='inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium text-gray-600 bg-gray-100'>
-										{nftApiService.formatCategory(nft.category || 'general')}
-									</span>
-								</div>
-
-								{/* 领取条件 */}
-								{!nft.canClaim && nft.missingRequirements.length > 0 && (
-									<div className='text-xs text-orange-600 bg-orange-50 p-2 rounded mb-3'>
-										<p>还需要:</p>
-										<ul className='list-disc list-inside'>
-											{nft.missingRequirements.map((req, index) => (
-												<li key={index}>{req}</li>
-											))}
-										</ul>
-									</div>
-								)}
-
-								{/* 领取按钮 */}
-								<button
-									onClick={() => handleClaimNft(nft.id!)}
-									disabled={!nft.canClaim || isClaiming}
-									className={`w-full py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-										nft.canClaim
-											? 'bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50'
-											: 'bg-gray-100 text-gray-400 cursor-not-allowed'
-									}`}
-								>
-									{isClaiming
-										? '领取中...'
-										: nft.canClaim
-										? '🎁 领取NFT'
-										: '条件不足'}
-								</button>
-							</div>
+								nft={nft}
+								type='eligible'
+								onClaim={handleClaimNft}
+								isClaiming={isClaiming}
+								index={index}
+							/>
 						))}
 					</div>
 				)}
@@ -190,52 +137,14 @@ export function NFTCollection({ className = '' }: NFTCollectionProps) {
 						</p>
 					</div>
 				) : (
-					<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
-						{ownedNfts.map((ownedNft) => (
-							<div
+					<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+						{ownedNfts.map((ownedNft, index) => (
+							<NFTCard
 								key={ownedNft.claimId}
-								className='bg-white rounded-lg shadow-md p-4 border border-green-200'
-							>
-								{ownedNft.nft.imageUrl && (
-									<img
-										src={ownedNft.nft.imageUrl}
-										alt={ownedNft.nft.name}
-										className='w-full h-48 object-cover rounded-lg mb-3'
-									/>
-								)}
-								<h4 className='font-semibold text-gray-900 mb-2'>
-									{ownedNft.nft.name}
-								</h4>
-								<p className='text-sm text-gray-600 mb-3 line-clamp-2'>
-									{ownedNft.nft.description}
-								</p>
-
-								{/* NFT属性 */}
-								<div className='flex flex-wrap gap-1 mb-3'>
-									<span
-										className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${nftApiService.getRarityColor(
-											ownedNft.nft.rarity
-										)}`}
-									>
-										{'⭐'.repeat(ownedNft.nft.rarity)}
-									</span>
-									<span className='inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium text-green-600 bg-green-100'>
-										已拥有
-									</span>
-								</div>
-
-								{/* 获得时间和交易信息 */}
-								<div className='text-xs text-gray-500 space-y-1'>
-									<p>
-										获得时间:{' '}
-										{new Date(ownedNft.claimedAt).toLocaleDateString()}
-									</p>
-									<p>
-										交易哈希:{' '}
-										{nftApiService.formatTxHash(ownedNft.transactionHash)}
-									</p>
-								</div>
-							</div>
+								nft={ownedNft}
+								type='owned'
+								index={index}
+							/>
 						))}
 					</div>
 				)}

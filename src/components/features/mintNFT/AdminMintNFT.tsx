@@ -6,10 +6,12 @@ import nftApiService, {
 	type AddNftToPoolRequest,
 	type MintNFTResponse,
 } from '@/services/nftApi';
+import { useAdminAuth } from '@/hooks/useAdminAuth';
 import { NFTForm } from './NFTForm';
 import { NFTPreview } from './NFTPreview';
 import { StatusMessage } from './StatusMessage';
 import { WalletRequiredMessage } from './WalletRequiredMessage';
+import UnauthorizedMessage from './UnauthorizedMessage';
 
 interface AdminMintNFTProps {
 	className?: string;
@@ -44,7 +46,8 @@ export default function AdminMintNFT({ className = '' }: AdminMintNFTProps) {
 		'info'
 	);
 
-	const { address: walletAddress, isConnected } = useAccount();
+	const { isConnected } = useAccount();
+	const { isAdmin, currentAddress } = useAdminAuth();
 
 	// 清空表单
 	const clearForm = () => {
@@ -111,7 +114,10 @@ export default function AdminMintNFT({ className = '' }: AdminMintNFTProps) {
 			}, 2000);
 		} catch (error: unknown) {
 			console.error('铸造NFT失败:', error);
-			const errorMessage = error instanceof Error ? error.message : '网络错误，请检查后端服务并稍后重试';
+			const errorMessage =
+				error instanceof Error
+					? error.message
+					: '网络错误，请检查后端服务并稍后重试';
 			setMessage(`❌ 铸造失败: ${errorMessage}`);
 			setMessageType('error');
 		} finally {
@@ -129,18 +135,46 @@ export default function AdminMintNFT({ className = '' }: AdminMintNFTProps) {
 		return <WalletRequiredMessage className={className} />;
 	}
 
+	// 如果连接了钱包但不是管理员
+	if (!isAdmin) {
+		return (
+			<UnauthorizedMessage
+				className={className}
+				currentAddress={currentAddress}
+			/>
+		);
+	}
+
 	return (
-		<div className={`bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 ${className}`}>
+		<div
+			className={`bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 ${className}`}
+		>
 			{/* 标题 */}
 			<div className='mb-6'>
 				<h2 className='text-2xl font-bold text-gray-900 dark:text-white mb-2'>
 					🏭 管理员 NFT 铸造
 				</h2>
-				<div className='mt-2 text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 p-2 rounded'>
-					当前钱包:{' '}
-					{walletAddress
-						? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
-						: '未连接'}
+				<div className='mt-2 space-y-2'>
+					<div className='text-xs text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 p-2 rounded flex items-center'>
+						<svg
+							className='w-4 h-4 mr-1'
+							fill='currentColor'
+							viewBox='0 0 20 20'
+						>
+							<path
+								fillRule='evenodd'
+								d='M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z'
+								clipRule='evenodd'
+							/>
+						</svg>
+						✅ 管理员权限已验证
+					</div>
+					<div className='text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 p-2 rounded'>
+						当前钱包:{' '}
+						{currentAddress
+							? `${currentAddress.slice(0, 6)}...${currentAddress.slice(-4)}`
+							: '未连接'}
+					</div>
 				</div>
 			</div>
 
@@ -197,7 +231,9 @@ export default function AdminMintNFT({ className = '' }: AdminMintNFTProps) {
 
 			{/* 使用说明 */}
 			<div className='mt-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-md'>
-				<h4 className='font-medium text-gray-800 dark:text-white mb-2'>💡 使用说明:</h4>
+				<h4 className='font-medium text-gray-800 dark:text-white mb-2'>
+					💡 使用说明:
+				</h4>
 				<ul className='text-sm text-gray-600 dark:text-gray-300 space-y-1'>
 					<li>• 所有标记为 * 的字段都是必填项</li>
 					<li>• 稀有度 1-5 星，越高越稀有，影响NFT的珍贵程度</li>

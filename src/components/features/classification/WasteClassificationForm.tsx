@@ -168,7 +168,7 @@ export default function WasteClassificationForm() {
 						🌱 垃圾分类挑战
 					</h1>
 					<p className='text-gray-600'>
-						上传垃圾图片，选择正确分类，获得环保NFT！
+						上传垃圾图片，选择正确分类，获得积分领取环保NFT！
 					</p>
 				</div>
 

@@ -13,24 +13,24 @@ const inter = Inter({
 
 export const metadata: Metadata = {
 	title: {
-		default: 'WasteToNFT - 垃圾分类变有趣',
+		default: 'WasteWise',
 		template: '%s | WasteToNFT',
 	},
 	description: '正确分类垃圾，获得独特的环保NFT，为地球做贡献！',
 	keywords: ['垃圾分类', 'NFT', '环保', 'Web3', '区块链', 'AI识别'],
 	authors: [{ name: 'WasteToNFT Team' }],
-	creator: 'WasteToNFT Team',
+	creator: 'WasteWise Team',
 	openGraph: {
 		type: 'website',
 		locale: 'zh_CN',
-		url: 'https://wastetonfr.com',
+		url: 'https://www.wastewise.store/',
 		title: 'WasteToNFT - 垃圾分类变有趣',
 		description: '正确分类垃圾，获得独特的环保NFT，为地球做贡献！',
-		siteName: 'WasteToNFT',
+		siteName: 'WasteWise',
 	},
 	twitter: {
 		card: 'summary_large_image',
-		title: 'WasteToNFT - 垃圾分类变有趣',
+		title: 'WasteWise',
 		description: '正确分类垃圾，获得独特的环保NFT，为地球做贡献！',
 	},
 	robots: {

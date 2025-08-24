@@ -57,6 +57,25 @@ export interface OwnedNFT {
   nft: NFTData & { id: number };
   claimedAt: string;
   transactionHash: string;
+  tokenId?: number;
+  contractAddress?: string;
+}
+
+// 管理员铸造的NFT（已上链但未被领取）
+export interface AdminMintedNFT {
+  id: number;
+  name: string;
+  description: string;
+  imageUrl: string;
+  tokenId: number;
+  rarity: number;
+  category: string;
+  requiredScore: number;
+  requiredClassifications: number;
+  contractAddress: string;
+  metadataUri: string;
+  status: 'AVAILABLE' | 'RESERVED';
+  createdAt: string;
 }
 
 export interface NFTPoolStats {
