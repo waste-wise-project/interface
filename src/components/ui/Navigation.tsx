@@ -12,7 +12,7 @@ export default function Navigation() {
   const navigation = [
 		{ name: '首页', href: '/', current: pathname === '/' },
 		{
-			name: '垃圾分类',
+			name: '挑战分类',
 			href: '/classification',
 			current: pathname === '/classification',
 		},
