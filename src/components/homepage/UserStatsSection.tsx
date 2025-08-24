@@ -37,11 +37,12 @@ export default function UserStatsSection() {
         })
         .then(data => {
           // 转换后端数据格式到前端需要的格式
+          const responseData = data.data || data;
           const transformedStats: UserStats = {
-            totalAttempts: data.totalClassifications || 0,
-            correctAttempts: data.correctClassifications || 0,
-            accuracy: data.accuracyRate || 0,
-            totalCredits: data.totalScore || 0,
+            totalAttempts: responseData.totalClassifications || 0,
+            correctAttempts: responseData.correctClassifications || 0,
+            accuracy: responseData.accuracyRate || 0,
+            totalCredits: responseData.totalScore || 0,
             nftCount: 0 // TODO: 需要从NFT接口获取
           };
           setStats(transformedStats);
