@@ -1,6 +1,10 @@
 import { Achievement } from '@/stores';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import { useAchievementStore } from '@/stores/useAchievementStore';
+import { useAccount } from 'wagmi';
+import { useToast } from '@/hooks/useToast';
+import { useState } from 'react';
 
 export default function AchievementCard({
 	achievement,
@@ -9,6 +13,30 @@ export default function AchievementCard({
 	achievement: Achievement;
 	index: number;
 }) {
+	const { address } = useAccount();
+	const { claimAchievement } = useAchievementStore();
+	const toast = useToast();
+	const [isClaiming, setIsClaiming] = useState(false);
+
+	const handleClaimAchievement = async () => {
+		if (!address) {
+			toast.error('请先连接钱包');
+			return;
+		}
+
+		if (isClaiming) return;
+
+		try {
+			setIsClaiming(true);
+			await claimAchievement(achievement.id, address);
+			toast.success(`成功领取成就"${achievement.name}"，获得 ${achievement.scoreReward} 积分！`);
+		} catch (error) {
+			console.error('领取成就失败:', error);
+			toast.error('领取成就失败，请稍后重试');
+		} finally {
+			setIsClaiming(false);
+		}
+	};
 
 	// 根据状态获取样式 - 参考图片设计
 	const getStatusStyle = () => {
@@ -160,10 +188,19 @@ export default function AchievementCard({
 							<motion.button
 								whileHover={{ scale: 1.05 }}
 								whileTap={{ scale: 0.95 }}
-								className={`bg-gradient-to-r ${status.bg} text-white px-4 py-2 rounded-full text-xs font-bold shadow-md hover:shadow-lg transition-all duration-300`}
+								onClick={handleClaimAchievement}
+								disabled={isClaiming}
+								className={`bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-2 rounded-full text-xs font-bold shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed`}
 							>
-								已领取奖励
+								{isClaiming ? '领取中...' : '🎁 领取奖励'}
 							</motion.button>
+						)}
+
+						{/* 已领取状态 */}
+						{achievement.isClaimed && (
+							<div className="bg-gradient-to-r from-gray-400 to-gray-500 text-white px-4 py-2 rounded-full text-xs font-bold shadow-md">
+								✅ 已领取
+							</div>
 						)}
 					</div>
 				</div>
