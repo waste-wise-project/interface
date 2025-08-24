@@ -130,7 +130,13 @@ export default function AchievementCard({
 									duration: 1.2,
 									ease: 'easeOut',
 								}}
-								className='h-full bg-gray-300 rounded-full relative overflow-hidden'
+								className={`h-full rounded-full relative overflow-hidden ${
+									achievement.progress === 0 
+										? 'bg-gray-300' 
+										: achievement.isCompleted 
+											? 'bg-gradient-to-r from-green-400 to-green-500'
+											: 'bg-gradient-to-r from-blue-400 to-blue-500'
+								}`}
 							>
 								{/* 进度条光效 */}
 								<div className='absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse' />

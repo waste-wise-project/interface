@@ -164,9 +164,11 @@ const AchievementList = ({
 						</motion.div>
 						<div className='flex-1'>
 							<div className='font-bold text-lg'>
-								有 {stats.claimable} 个成就可领取！
+								有 {stats.claimable} 个成就已领取！
 							</div>
-							<div className='text-sm text-white/90'>点击卡片领取奖励</div>
+							<div className='text-sm text-white/90'>
+								赶快去看看是否可以领取NFT吧
+							</div>
 						</div>
 					</div>
 
