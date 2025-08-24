@@ -108,25 +108,16 @@ export function NFTForm({ formData, setFormData, isLoading }: NFTFormProps) {
 					>
 						<option value={1}>⭐ 1 - {nftApiService.formatRarity(1)}</option>
 						<option value={2}>⭐⭐ 2 - {nftApiService.formatRarity(2)}</option>
-						<option value={3}>⭐⭐⭐ 3 - {nftApiService.formatRarity(3)}</option>
-						<option value={4}>⭐⭐⭐⭐ 4 - {nftApiService.formatRarity(4)}</option>
-						<option value={5}>⭐⭐⭐⭐⭐ 5 - {nftApiService.formatRarity(5)}</option>
+						<option value={3}>
+							⭐⭐⭐ 3 - {nftApiService.formatRarity(3)}
+						</option>
+						<option value={4}>
+							⭐⭐⭐⭐ 4 - {nftApiService.formatRarity(4)}
+						</option>
+						<option value={5}>
+							⭐⭐⭐⭐⭐ 5 - {nftApiService.formatRarity(5)}
+						</option>
 					</select>
-				</div>
-
-				<div>
-					<label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
-						需要积分
-					</label>
-					<input
-						type='number'
-						min='0'
-						step='1'
-						value={formData.requiredScore}
-						onChange={(e) => updateFormData('requiredScore', Number(e.target.value))}
-						disabled={isLoading}
-						className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 dark:disabled:bg-gray-600 transition-colors'
-					/>
 				</div>
 			</div>
 
@@ -141,16 +132,20 @@ export function NFTForm({ formData, setFormData, isLoading }: NFTFormProps) {
 						min='0'
 						step='1'
 						value={formData.requiredClassifications}
-						onChange={(e) => updateFormData('requiredClassifications', Number(e.target.value))}
+						onChange={(e) =>
+							updateFormData('requiredClassifications', Number(e.target.value))
+						}
 						disabled={isLoading}
 						className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 dark:disabled:bg-gray-600 transition-colors'
 					/>
 				</div>
-				
+
 				{/* 实时预览积分显示 */}
 				<div className='flex items-end'>
 					<div className='p-3 bg-gray-50 dark:bg-gray-700 rounded-md w-full'>
-						<div className='text-sm text-gray-600 dark:text-gray-400'>积分显示预览:</div>
+						<div className='text-sm text-gray-600 dark:text-gray-400'>
+							积分显示预览:
+						</div>
 						<div className='font-semibold text-gray-800 dark:text-white'>
 							{nftApiService.formatScore(formData.requiredScore)} 积分
 						</div>
@@ -171,7 +166,8 @@ export function NFTForm({ formData, setFormData, isLoading }: NFTFormProps) {
 							className='w-full max-w-xs mx-auto rounded-lg shadow-sm'
 							onError={(e) => {
 								const target = e.target as HTMLImageElement;
-								target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2Y3ZjdmNyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM5OTk5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj7lm77niYfliKDovb3lpLHotKU8L3RleHQ+PC9zdmc+';
+								target.src =
+									'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2Y3ZjdmNyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM5OTk5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj7lm77niYfliKDovb3lpLHotKU8L3RleHQ+PC9zdmc+';
 							}}
 						/>
 					</div>
@@ -182,7 +178,10 @@ export function NFTForm({ formData, setFormData, isLoading }: NFTFormProps) {
 			{(() => {
 				const validation = nftApiService.validateNFTData(formData);
 
-				if (!validation.isValid && (formData.name || formData.description || formData.imageUrl)) {
+				if (
+					!validation.isValid &&
+					(formData.name || formData.description || formData.imageUrl)
+				) {
 					return (
 						<div className='p-3 bg-orange-50 dark:bg-orange-900/30 border border-orange-200 dark:border-orange-800 rounded-md'>
 							<p className='text-sm text-orange-800 dark:text-orange-300 font-medium mb-1'>
