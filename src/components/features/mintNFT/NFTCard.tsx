@@ -120,7 +120,6 @@ export default function NFTCard({
 							{statusStyle.badgeText}
 						</span>
 					</div>
-
 				</div>
 
 				{/* 卡片内容 */}
@@ -153,11 +152,11 @@ export default function NFTCard({
 					{/* 详细信息 */}
 					<div className='space-y-2 text-xs text-gray-500 bg-gray-50 p-3 rounded-lg'>
 						{/* TokenID显示（仅已拥有的NFT） */}
-						{type === 'owned' && ownedNft && (ownedNft.tokenId !== undefined || ownedNft.nft?.tokenId !== undefined) && (
+						{type === 'owned' && ownedNft && ownedNft.tokenId !== undefined && (
 							<div className='flex justify-between items-center'>
 								<span>Token ID:</span>
 								<span className='font-mono font-bold text-blue-600'>
-									{ownedNft.tokenId ?? ownedNft.nft?.tokenId}
+									{ownedNft.tokenId}
 								</span>
 							</div>
 						)}
@@ -189,14 +188,16 @@ export default function NFTCard({
 						)}
 
 						{/* 可领取NFT的条件信息 */}
-						{type === 'eligible' && eligibleNft && nftData.requiredScore > 0 && (
-							<div className='flex justify-between items-center'>
-								<span>需求积分:</span>
-								<span className='font-bold text-amber-600'>
-									{nftData.requiredScore}
-								</span>
-							</div>
-						)}
+						{type === 'eligible' &&
+							eligibleNft &&
+							nftData.requiredScore > 0 && (
+								<div className='flex justify-between items-center'>
+									<span>需求积分:</span>
+									<span className='font-bold text-amber-600'>
+										{nftData.requiredScore}
+									</span>
+								</div>
+							)}
 					</div>
 
 					{/* 领取条件提示 */}
